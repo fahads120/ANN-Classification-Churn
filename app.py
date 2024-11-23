@@ -1,33 +1,35 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
-from sklearn.preprocessing import StandardScaler, LabelEncoder , OneHotEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 import pandas as pd
 import pickle
 
-model=tf.keras.models.load_model('model.h5')
+# Load the trained model
+model = tf.keras.models.load_model('model.h5')
 
 # Load the one-hot encoder for geography
 with open('onehot_encoder_geo.pkl', 'rb') as file:
-    label_encoder_geo = pickle.load(file)
+    onehot_encoder_geo = pickle.load(file)  # Corrected variable name
 
 # Load the label encoder for gender
-with open('label_encoder_gender.pkl', 'rb') as file:  # Fixed filename
+with open('label_encoder_gender.pkl', 'rb') as file:
     label_encoder_gender = pickle.load(file)
 
-# Load the scalera
+# Load the scaler
 with open('scaler.pkl', 'rb') as file:
     scaler = pickle.load(file)
 
+# App Title
 st.title('Customer Churn Prediction')
 
-# User input
-geography = st.selectbox('Geography', onehot_encoder_geo.categories_[0])
+# User Input
+geography = st.selectbox('Geography', onehot_encoder_geo.categories_[0])  # Consistent variable name
 gender = st.selectbox('Gender', label_encoder_gender.classes_)
 age = st.slider('Age', 18, 92)
-balance = st.number_input('Balance')
-credit_score = st.number_input('Credit Score')
-estimated_salary = st.number_input('Estimated Salary')
+balance = st.number_input('Balance', value=0.0)
+credit_score = st.number_input('Credit Score', value=0.0)
+estimated_salary = st.number_input('Estimated Salary', value=0.0)
 tenure = st.slider('Tenure', 0, 10)
 num_of_products = st.slider('Number of Products', 1, 4)
 has_cr_card = st.selectbox('Has Credit Card', [0, 1])
@@ -56,11 +58,11 @@ input_data = pd.concat([input_data.reset_index(drop=True), geo_encoded_df], axis
 # Scale the input data
 input_data_scaled = scaler.transform(input_data)
 
-
 # Predict churn
 prediction = model.predict(input_data_scaled)
 prediction_proba = prediction[0][0]
 
+# Display the prediction results
 st.write(f'Churn Probability: {prediction_proba:.2f}')
 
 if prediction_proba > 0.5:
